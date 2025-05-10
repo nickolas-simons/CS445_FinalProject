@@ -159,6 +159,30 @@ def chroma_key(img):
     return [top,right,bottom,left]
 
 #Function for FastLineDetector and helper functions below
+def othello_prep_image(img):
+    chroma_key=np.array([0, 1, 0])  
+    sigma=30
+    ksize=15
+    threshold=0.95
+
+    oned_fil = cv2.getGaussianKernel(ksize, sigma)
+    twod_fil = oned_fil @ oned_fil.T
+    # Step 2: Prepare the mask based on chroma key
+    mask = np.zeros_like(img, dtype=np.float32)
+    for i in range(img.shape[0]):
+        for j in range(img.shape[1]):
+            color = img[i, j].astype(np.float32) / 255.0  # Normalize to [0, 1]
+            difference = np.abs(chroma_key - color)
+            mask[i, j] = np.ones(3) if np.sum(difference) < threshold else np.zeros(3)
+
+    # Step 3: Apply the Gaussian filter
+    mask = np.clip(cv2.filter2D(mask, -1, twod_fil), 0, 1)
+
+    # Step 4: Apply the mask to the original image
+    masked_img = (mask * (img.astype(np.float32) / 255.0)) * 255
+    masked_img = masked_img.astype(np.uint8)
+    return masked_img
+
 def get_dynamic_length_threshold(image, lines, scale_factor=0.15, min_length=20):
     # Get image dimensions
     height, width = image.shape[:2]
@@ -179,8 +203,10 @@ def get_dynamic_length_threshold(image, lines, scale_factor=0.15, min_length=20)
 
 
 def fast_line_detector(img):
-    mask = prep_image(img,(0,1,0),10,(int)(img.shape[0]/10),0.95)
-    masked_img =  (mask*img * 255).astype(np.uint8)
+    # mask = prep_image(img,(0,1,0),10,(int)(img.shape[0]/10),0.95)
+    # masked_img =  (mask*img * 255).astype(np.uint8)
+
+    masked_img = othello_prep_image(img)
     resize_factor = 0.5
     resized_image = cv2.resize(masked_img, (0, 0), fx=resize_factor, fy=resize_factor)
 
@@ -196,7 +222,7 @@ def fast_line_detector(img):
 
     # Step 2: Detect lines
     lines = fld.detect(edges)
-    print(f"lines: {lines}, lines type: {type(lines)}")
+    #print(f"lines: {lines}, lines type: {type(lines)}")
 
     # Use dynamic threshold for line length filtering
     dynamic_threshold = get_dynamic_length_threshold(resized_image, lines, scale_factor=0.15)
@@ -245,6 +271,20 @@ def fast_line_detector(img):
     # Scale the corner coordinates back to the original image size
         original_corner = [int(corner[0] * scale_factor_x), int(corner[1] * scale_factor_y)]
         original_corners.append(original_corner)
+    # Ensure corners are sorted in clockwise order
+    if original_corners:
+        # Calculate the centroid
+        centroid = np.mean(original_corners, axis=0)
+
+        # Sort corners based on their angle relative to the centroid
+        def angle_from_centroid(point):
+            dx = point[0] - centroid[0]
+            dy = point[1] - centroid[1]
+            return np.arctan2(dy, dx)
+
+        original_corners.sort(key=angle_from_centroid)
+
+    #print(f"Sorted corners (clockwise): {original_corners}")
     return original_corners
 
 
