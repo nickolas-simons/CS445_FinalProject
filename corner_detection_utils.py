@@ -65,17 +65,13 @@ def hough(img):
     lines = cv2.HoughLinesP(edges,rho=1,theta=np.pi / 180,threshold=img.shape[0]//10,minLineLength=img.shape[0]/4,maxLineGap=img.shape[0]//10)
     line_detection_img = img.copy()
 
-    rho_theta = []
+    theta = []
     for x1,y1,x2,y2 in lines[:,0]:
         theta = np.arctan2(y2-y1, x2-x1) + 3*np.pi/2
-        rho = x1*np.cos(theta) + y1*np.sin(theta)
-        rho_theta.append([theta])
-    rho_theta = np.array(rho_theta)
+        theta.append([theta])
+    theta = np.array(theta)
 
-    from sklearn.preprocessing import StandardScaler
-    scaler = StandardScaler()
-    rt_scaled = scaler.fit_transform(rho_theta)
-    labels = db(eps=0.1, min_samples=1).fit_predict(rt_scaled)
+    labels = db(eps=0.1, min_samples=1).fit_predict(theta)
 
     vertical = []
     horizontal = []
