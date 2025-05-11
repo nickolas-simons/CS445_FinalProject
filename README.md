@@ -10,10 +10,10 @@ The "piece_detection_utils.py" contains the code for the piece detection impleme
 
 The 6 other folders contain the corners data from each method (1 folder per method), and images for each board with the calculated corners plotted onto the original image (1 folder per method)
 
-Needed Libraries:
-cv2
-matplotlib.pyplot
-numpy
-sklearn.cluster
-scipy.interpolate
+Needed Libraries:  
+cv2  
+matplotlib.pyplot  
+numpy  
+sklearn.cluster  
+scipy.interpolate  
 itertools
