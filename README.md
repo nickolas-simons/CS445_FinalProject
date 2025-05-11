@@ -9,3 +9,11 @@ The "piece_detection_utils.py" contains the code for the piece detection impleme
 "Real_Board_Values" Folder contains calculated board states by us in order to cross-check the methods.
 
 The 6 other folders contain the corners data from each method (1 folder per method), and images for each board with the calculated corners plotted onto the original image (1 folder per method)
+
+Needed Libraries:
+cv2
+matplotlib.pyplot
+numpy
+sklearn.cluster
+scipy.interpolate
+itertools
