@@ -33,7 +33,7 @@ def blur_image(transformed_image, ksize, sigma):
 
 def classify_color_rgb(avg_color):
   diff_w = np.square(avg_color - [1, 1, 1])
-  diff_g = np.square(avg_color - [0, 0.8, 0])
+  diff_g = np.square(avg_color - [0, 0.8, 0]) #Original 0.8
   diff_b = np.square(avg_color - [0, 0, 0]) # for completion sake
 
   diff_w_s = np.sum(diff_w)

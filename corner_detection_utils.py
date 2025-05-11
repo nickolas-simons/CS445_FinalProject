@@ -181,6 +181,7 @@ def othello_prep_image(img):
     # Step 4: Apply the mask to the original image
     masked_img = (mask * (img.astype(np.float32) / 255.0)) * 255
     masked_img = masked_img.astype(np.uint8)
+
     return masked_img
 
 def get_dynamic_length_threshold(image, lines, scale_factor=0.15, min_length=20):
@@ -207,6 +208,11 @@ def fast_line_detector(img):
     # masked_img =  (mask*img * 255).astype(np.uint8)
 
     masked_img = othello_prep_image(img)
+    plt.figure(figsize=(3, 3))  # Adjust the size as needed
+    plt.imshow(masked_img)
+    plt.title('masked_image')
+    plt.axis("off")  # Optional, hides the axes
+    plt.show()
     resize_factor = 0.5
     resized_image = cv2.resize(masked_img, (0, 0), fx=resize_factor, fy=resize_factor)
 
@@ -226,6 +232,7 @@ def fast_line_detector(img):
 
     # Use dynamic threshold for line length filtering
     dynamic_threshold = get_dynamic_length_threshold(resized_image, lines, scale_factor=0.15)
+    print(f"Dynamic Threshold: {dynamic_threshold}")
     endpoints = []
     line_image = resized_image.copy()
     if lines is not None:
@@ -237,6 +244,7 @@ def fast_line_detector(img):
             if length > dynamic_threshold:
                 endpoints.append(((x1, y1), (x2, y2)))
                 cv2.line(line_image, (x1, y1), (x2, y2), (0, 0, 255), 2)
+
     # Step 3: Find all intersections of the longest lines (Represent corners)
     corners = []
     image_height, image_width = resized_image.shape[:2]
