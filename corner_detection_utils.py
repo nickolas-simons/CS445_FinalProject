@@ -159,6 +159,11 @@ def chroma_key(img):
     return [top,right,bottom,left]
 
 #Function for FastLineDetector and helper functions below
+def display_image(img):
+    plt.figure(figsize=(3, 3)) 
+    plt.imshow(img)
+    plt.show()
+
 def othello_prep_image(img):
     chroma_key=np.array([0, 1, 0])  
     sigma=30
@@ -177,11 +182,12 @@ def othello_prep_image(img):
 
     # Step 3: Apply the Gaussian filter
     mask = np.clip(cv2.filter2D(mask, -1, twod_fil), 0, 1)
+    display_image(mask)
 
     # Step 4: Apply the mask to the original image
     masked_img = (mask * (img.astype(np.float32) / 255.0)) * 255
     masked_img = masked_img.astype(np.uint8)
-
+    display_image(masked_img)
     return masked_img
 
 def get_dynamic_length_threshold(image, lines, scale_factor=0.15, min_length=20):
@@ -204,15 +210,7 @@ def get_dynamic_length_threshold(image, lines, scale_factor=0.15, min_length=20)
 
 
 def fast_line_detector(img):
-    # mask = prep_image(img,(0,1,0),10,(int)(img.shape[0]/10),0.95)
-    # masked_img =  (mask*img * 255).astype(np.uint8)
-
     masked_img = othello_prep_image(img)
-    plt.figure(figsize=(3, 3))  # Adjust the size as needed
-    plt.imshow(masked_img)
-    plt.title('masked_image')
-    plt.axis("off")  # Optional, hides the axes
-    plt.show()
     resize_factor = 0.5
     resized_image = cv2.resize(masked_img, (0, 0), fx=resize_factor, fy=resize_factor)
 
@@ -221,9 +219,11 @@ def fast_line_detector(img):
 
     # Use GaussianBlur to reduce noise
     blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+    display_image(blurred)
 
     # Step 1: Use Canny edge detection to highlight edges
     edges = cv2.Canny(blurred, 50, 150, apertureSize=3)
+    display_image(edges)
     fld = cv2.ximgproc.createFastLineDetector()
 
     # Step 2: Detect lines
@@ -232,7 +232,6 @@ def fast_line_detector(img):
 
     # Use dynamic threshold for line length filtering
     dynamic_threshold = get_dynamic_length_threshold(resized_image, lines, scale_factor=0.15)
-    print(f"Dynamic Threshold: {dynamic_threshold}")
     endpoints = []
     line_image = resized_image.copy()
     if lines is not None:
@@ -244,7 +243,7 @@ def fast_line_detector(img):
             if length > dynamic_threshold:
                 endpoints.append(((x1, y1), (x2, y2)))
                 cv2.line(line_image, (x1, y1), (x2, y2), (0, 0, 255), 2)
-
+    display_image(line_image)
     # Step 3: Find all intersections of the longest lines (Represent corners)
     corners = []
     image_height, image_width = resized_image.shape[:2]
