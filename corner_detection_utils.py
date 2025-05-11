@@ -292,6 +292,8 @@ def fast_line_detector(img):
 
         original_corners.sort(key=angle_from_centroid)
 
+        original_corners = original_corners[-2:] + original_corners[:-2]
+
     #print(f"Sorted corners (clockwise): {original_corners}")
     return original_corners
 
